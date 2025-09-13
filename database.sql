@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert sample products (at least 5 dummy entries11)
+
+-- Insert sample products (at least 5 dummy entries11)hi
 INSERT INTO products (name, price, category, description, image_url, stock_quantity, is_featured) VALUES
 ('Wireless Bluetooth Headphones', 89.99, 'Electronics', 'Premium wireless headphones with noise cancellation and 30-hour battery life.', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop', 50, TRUE),
 ('Organic Cotton T-Shirt', 24.99, 'Clothing', 'Comfortable organic cotton t-shirt made from sustainable materials.', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop', 100, FALSE),
