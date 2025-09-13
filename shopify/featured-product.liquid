@@ -1,0 +1,407 @@
+{% comment %}
+  Featured Product Section - Adhyatmik Web Development Assignment
+  Task 2: Shopify / Liquid Simulation (Frontend)
+  
+  This is a custom Shopify Liquid section that displays a featured product
+  with image, name, price, and a 'Buy Now' button.
+{% endcomment %}
+
+{%- liquid
+  assign featured_product = section.settings.featured_product
+  assign show_price = section.settings.show_price
+  assign show_vendor = section.settings.show_vendor
+  assign button_text = section.settings.button_text | default: 'Buy Now'
+  assign image_ratio = section.settings.image_ratio | default: 'square'
+-%}
+
+<div class="featured-product-section" id="featured-product-{{ section.id }}">
+  <div class="featured-product-container">
+    {% if featured_product != blank %}
+      <div class="featured-product-card">
+        <div class="product-image-wrapper">
+          {% if featured_product.featured_image %}
+            <img 
+              src="{{ featured_product.featured_image | img_url: '600x600' }}"
+              alt="{{ featured_product.featured_image.alt | escape }}"
+              class="product-image"
+              loading="lazy"
+              width="600"
+              height="600"
+            >
+          {% else %}
+            <div class="product-image-placeholder">
+              <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" fill="#f3f3f3"/>
+                <path d="M30 40L50 20L70 40V80H30V40Z" stroke="#ccc" stroke-width="2" fill="none"/>
+                <circle cx="40" cy="50" r="3" fill="#ccc"/>
+              </svg>
+            </div>
+          {% endif %}
+          
+          {% if featured_product.compare_at_price > featured_product.price %}
+            <div class="sale-badge">
+              Sale
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="product-info">
+          {% if show_vendor and featured_product.vendor != blank %}
+            <div class="product-vendor">
+              {{ featured_product.vendor }}
+            </div>
+          {% endif %}
+          
+          <h3 class="product-title">
+            <a href="{{ featured_product.url }}" class="product-link">
+              {{ featured_product.title }}
+            </a>
+          </h3>
+          
+          {% if show_price %}
+            <div class="product-price">
+              {% if featured_product.compare_at_price > featured_product.price %}
+                <span class="price-compare">{{ featured_product.compare_at_price | money }}</span>
+                <span class="price-sale">{{ featured_product.price | money }}</span>
+              {% else %}
+                <span class="price-regular">{{ featured_product.price | money }}</span>
+              {% endif %}
+            </div>
+          {% endif %}
+          
+          <div class="product-actions">
+            <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form">
+              <input type="hidden" name="id" value="{{ featured_product.selected_or_first_available_variant.id }}">
+              <button type="submit" name="add" class="btn btn-primary buy-now-btn">
+                <span class="btn-text">{{ button_text }}</span>
+                <span class="btn-loading" style="display: none;">
+                  <svg class="spinner" width="20" height="20" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="50" stroke-dashoffset="50">
+                      <animate attributeName="stroke-dashoffset" dur="1s" values="50;0" repeatCount="indefinite"/>
+                    </circle>
+                  </svg>
+                  Adding...
+                </span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="featured-product-placeholder">
+        <div class="placeholder-content">
+          <h3>No featured product selected</h3>
+          <p>Please select a product in the theme customizer to display here.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .featured-product-section {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  }
+  
+  .featured-product-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .featured-product-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .featured-product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1;
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .featured-product-card:hover .product-image {
+    transform: scale(1.1);
+  }
+  
+  .product-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+  }
+  
+  .sale-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #ff4757;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .product-info {
+    padding: 2rem;
+  }
+  
+  .product-vendor {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .product-link {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .product-link:hover {
+    color: #3498db;
+  }
+  
+  .product-price {
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  
+  .price-regular {
+    color: #2c3e50;
+  }
+  
+  .price-compare {
+    color: #95a5a6;
+    text-decoration: line-through;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+  
+  .price-sale {
+    color: #e74c3c;
+  }
+  
+  .product-actions {
+    margin-top: 1.5rem;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  
+  .btn-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .featured-product-placeholder {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .placeholder-content h3 {
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+  
+  .placeholder-content p {
+    color: #95a5a6;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .featured-product-section {
+      padding: 1rem 0;
+    }
+    
+    .featured-product-container {
+      padding: 0 0.5rem;
+    }
+    
+    .product-info {
+      padding: 1.5rem;
+    }
+    
+    .product-title {
+      font-size: 1.25rem;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-info {
+      padding: 1rem;
+    }
+    
+    .product-title {
+      font-size: 1.125rem;
+    }
+    
+    .product-price {
+      font-size: 1.125rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const buyButtons = document.querySelectorAll('.buy-now-btn');
+    
+    buyButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        const btnText = this.querySelector('.btn-text');
+        const btnLoading = this.querySelector('.btn-loading');
+        
+        if (btnText && btnLoading) {
+          btnText.style.display = 'none';
+          btnLoading.style.display = 'flex';
+          
+          // Re-enable button after 3 seconds (in case of error)
+          setTimeout(() => {
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+          }, 3000);
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Featured Product",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "Featured Product"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show Price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show Vendor",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Buy Now"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image Ratio",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait (3:4)"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape (4:3)"
+        }
+      ],
+      "default": "square"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Product"
+    }
+  ]
+}
+{% endschema %}
